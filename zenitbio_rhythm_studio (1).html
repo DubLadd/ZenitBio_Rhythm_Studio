@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZenitBio // Rhythm Studio v5</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Fira+Code:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --bg: #020204;
+            --bg-card: #08080f;
+            --border: #1a162b;
+            --neon-green: #00ff41;
+            --neon-cyan: #00ffff;
+            --neon-pink: #ff0055;
+        }
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: var(--bg);
+            color: #f3f4f6;
+            background-image: 
+                linear-gradient(rgba(0, 255, 65, 0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.01) 1px, transparent 1px);
+            background-size: 25px 24px;
+        }
+        .neon-border-green {
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.1), inset 0 0 10px rgba(0, 255, 65, 0.05);
+            border: 1px solid rgba(0, 255, 65, 0.2);
+        }
+        .neon-border-cyan {
+            box-shadow: 0 0 15px rgba(0, 255, 255, 0.1), inset 0 0 10px rgba(0, 255, 255, 0.05);
+            border: 1px solid rgba(0, 255, 255, 0.2);
+        }
+        .neon-border-pink {
+            box-shadow: 0 0 15px rgba(255, 0, 85, 0.1), inset 0 0 10px rgba(255, 0, 85, 0.05);
+            border: 1px solid rgba(255, 0, 85, 0.2);
+        }
+        .glitch-text {
+            font-family: 'Syne', sans-serif;
+            text-shadow: 2px 0 var(--neon-pink), -2px 0 var(--neon-cyan);
+        }
+        .step {
+            aspect-ratio: 1;
+            cursor: pointer;
+            transition: all 0.1s ease;
+        }
+        .step.on {
+            background-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+        }
+        .step.playing {
+            box-shadow: 0 0 0 2px var(--neon-cyan);
+            transform: scale(1.1);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #020204; }
+        ::-webkit-scrollbar-thumb { background: #1a162b; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-cyan); }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center justify-start">
+
+    <!-- MASTER HUB CONSOLE -->
+    <div class="max-w-6xl w-full bg-[#08080f]/90 border border-[#1e1e2f] rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+        
+        <!-- Header -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-gray-800 pb-4 mb-6 gap-4">
+            <div>
+                <h1 class="text-4xl font-extrabold text-white glitch-text tracking-wide uppercase">ZENIT_BIO // RHYTHM STUDIO</h1>
+                <p class="text-xs text-gray-500 font-mono mt-1">STATUS: <span class="text-[#00ff41] animate-pulse">ONLINE</span> | STAGE: <span class="text-[#00ffff]">V5 MASTER CONSOLE</span></p>
+            </div>
+            
+            <!-- Tabovi za navigaciju -->
+            <div class="flex gap-2 bg-black/60 p-1.5 rounded-lg border border-gray-800">
+                <button onclick="switchTab('sequencer-tab', this)" class="tab-btn px-4 py-1.5 rounded text-xs font-bold bg-[#ff0055] text-white">⚡ SEQUENCER</button>
+                <button onclick="switchTab('crossdj-tab', this)" class="tab-btn px-4 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white">🎛️ CROSS DJ</button>
+                <button onclick="switchTab('stitcher-tab', this)" class="tab-btn px-4 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white">🪡 STITCHER</button>
+                <button onclick="switchTab('meme-tab', this)" class="tab-btn px-4 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white">💊 LABS</button>
+            </div>
+        </header>
+
+        <!-- ================= TAB 1: RHYTHM SEQUENCER (Tvoj v4 motor) ================= -->
+        <div id="sequencer-tab" class="tab-content block">
+            
+            <!-- AI generator row -->
+            <div class="flex flex-col md:flex-row gap-3 mb-6 bg-black/40 p-3 rounded-xl border border-gray-800">
+                <input class="flex-1 bg-[#030306] border border-gray-800 rounded px-4 py-2.5 text-xs text-white focus:outline-none focus:border-[#00ffff]" id="beatInput" placeholder="Opiši svoj ritam (npr. techno kick, afrobeats)..." autocomplete="off"/>
+                <div class="flex gap-2">
+                    <button class="bg-[#00ff41] hover:bg-green-500 text-black font-extrabold text-xs px-4 py-2.5 rounded transition-all flex items-center gap-1" id="generateBtn"><i class="fa-solid fa-wand-magic-sparkles"></i> GENERATE</button>
+                    <button class="bg-transparent border border-gray-700 hover:border-white text-white font-bold text-xs px-4 py-2.5 rounded transition-all" id="mutateBtn">⟳ MUTATE</button>
+                    <button class="bg-[#00ffff] hover:bg-cyan-400 text-black font-extrabold text-xs px-4 py-2.5 rounded transition-all flex items-center gap-1" id="aiTakeoverBtn">🤖 AI OVERRIDE</button>
+                    <button class="bg-[#ff0055] hover:bg-red-500 text-white font-extrabold text-xs px-4 py-2.5 rounded transition-all flex items-center gap-1" id="hypeDropBtn">🎤 HYPE DROP ✨</button>
+                </div>
+            </div>
+
+            <!-- Transport & Master Vol -->
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-6 items-center">
+                <!-- Transport gumbi -->
+                <div class="md:col-span-5 flex gap-2">
+                    <button class="flex-1 bg-green-600 hover:bg-green-700 text-black font-extrabold py-3 px-4 rounded text-xs transition-all" id="playBtn">▶ PLAY</button>
+                    <button class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded text-xs transition-all" id="stopBtn">■ STOP</button>
+                    <button class="bg-transparent border border-red-500/30 hover:bg-red-500/10 text-red-500 py-3 px-4 rounded text-xs transition-all" id="clearBtn">✕ CLEAR</button>
+                </div>
+                
+                <!-- Master volumen -->
+                <div class="md:col-span-3 flex items-center gap-3 bg-black/40 p-2.5 rounded-lg border border-gray-800">
+                    <span class="text-xs text-gray-500">VOL:</span>
+                    <input type="range" id="masterVol" min="0" max="1" step="0.01" value="0.8" class="flex-1">
+                    <span class="text-[10px] text-white w-8 text-right" id="masterVolVal">80%</span>
+                </div>
+
+                <!-- Tempo -->
+                <div class="md:col-span-4 flex items-center gap-3 bg-black/40 p-2.5 rounded-lg border border-gray-800">
+                    <span class="text-xs text-gray-500">BPM:</span>
+                    <input type="range" id="tempoSlider" min="60" max="200" value="120" class="flex-1">
+                    <span class="text-xs text-[#00ff41] font-bold w-16 text-right" id="tempoVal">120 BPM</span>
+                </div>
+            </div>
+
+            <!-- Broj koraka (Steps) -->
+            <div class="flex items-center gap-2 mb-4 bg-black/20 p-2 rounded-lg border border-gray-800/40 w-fit">
+                <span class="text-[10px] text-gray-500 uppercase tracking-widest mr-2">Koraci:</span>
+                <button class="step-btn px-2.5 py-1 rounded text-xs font-bold text-gray-400 hover:text-white" data-steps="4">4</button>
+                <button class="step-btn px-2.5 py-1 rounded text-xs font-bold text-gray-400 hover:text-white" data-steps="8">8</button>
+                <button class="step-btn px-2.5 py-1 rounded text-xs font-bold text-white bg-[#ff0055]" data-steps="16">16</button>
+                <button class="step-btn px-2.5 py-1 rounded text-xs font-bold text-gray-400 hover:text-white" data-steps="32">32</button>
+                <button class="step-btn px-2.5 py-1 rounded text-xs font-bold text-gray-400 hover:text-white" data-steps="64">64</button>
+            </div>
+
+            <!-- Sequencer Grid -->
+            <div class="sequencer bg-[#040408] border border-gray-800 rounded-xl p-4 overflow-x-auto mb-6" id="sequencer"></div>
+
+            <div class="flex justify-between items-center mb-6">
+                <button class="bg-[#00ffff]/10 border border-[#00ffff]/30 hover:bg-[#00ffff]/20 text-[#00ffff] px-4 py-2 rounded text-xs font-bold" id="addTrackBtn">+ DODAJ TRAKU</button>
+                <span class="text-xs text-gray-500 uppercase font-mono" id="trackCount">5 / 8 tracks</span>
+            </div>
+
+            <!-- FX hold / lock -->
+            <div class="mb-6">
+                <div class="text-xs text-gray-400 uppercase tracking-widest mb-3">Zvučni efekti // Pritisni za hold · Zaključaj za stalno</div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3" id="fxRow"></div>
+            </div>
+
+            <!-- Live Recorder -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-black/40 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs text-white font-bold mb-1">🔴 LIVE RECORDER // 320kbps</h4>
+                        <p class="text-[10px] text-gray-500">Snimaj svoj live klupski miks izravno u MP3/WebM.</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button class="bg-[#ff0055] hover:bg-[#d00045] text-white font-bold text-xs px-4 py-2.5 rounded" id="recBtn">⏺ RECORD</button>
+                        <span class="text-sm font-mono text-white font-bold w-12 text-center" id="recTimer">0:00</span>
+                        <button class="bg-green-600 hover:bg-green-700 text-black font-extrabold text-xs px-4 py-2.5 rounded hidden" id="downloadBtn">⬇ PREUZMI</button>
+                    </div>
+                </div>
+
+                <!-- Song import -->
+                <div class="bg-black/40 border border-gray-800 rounded-xl p-4 flex items-center justify-between">
+                    <div>
+                        <h4 class="text-xs text-white font-bold mb-1">📂 SONG IMPORT // AUTO BPM</h4>
+                        <p class="text-[10px] text-gray-500" id="songInfo">Uvezi pjesmu za sinkronizaciju brzine i DJ miks.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button class="bg-transparent border border-gray-700 hover:border-white text-white text-xs font-bold px-4 py-2.5 rounded" id="importSongBtn">ODABERI</button>
+                        <input type="file" id="songFile" accept="audio/*" class="hidden">
+                        <span class="text-[10px] bg-green-950/80 text-green-400 border border-green-800 px-2 py-1 rounded hidden" id="bpmDetected">~120 BPM</span>
+                        <button class="bg-[#00ffff] text-black font-extrabold text-xs px-3 py-1 rounded hidden" id="syncBpmBtn">SYNC</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ================= TAB 2: INTERACTIVE CROSS DJ BLENDER ================= -->
+        <div id="crossdj-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                
+                <!-- Deck A (Granny Node) -->
+                <div class="lg:col-span-4 bg-black/60 rounded-xl p-4 border border-green-500/20 text-center">
+                    <span class="text-[10px] text-green-400 font-bold block mb-2">// DECK A: APOCALYPSE GRANNY</span>
+                    <div class="relative aspect-square max-w-[240px] mx-auto overflow-hidden rounded-lg bg-zinc-950 border border-gray-800 flex items-center justify-center">
+                        <img id="deck-a-img" src="644016.png" class="object-cover w-full h-full opacity-100 transition-opacity">
+                    </div>
+                    <span class="text-[10px] text-gray-500 block mt-2">BASS STABLE // CHAINS</span>
+                </div>
+
+                <!-- Centralne DJ Kontrole s Crossfaderom i CAPT-CHCE Sonarom -->
+                <div class="lg:col-span-4 flex flex-col items-center justify-center gap-6">
+                    
+                    <!-- CAPT-CHCE Sonar vizualizator -->
+                    <div class="relative w-44 h-44 rounded-full border border-cyan-500/30 overflow-hidden flex items-center justify-center bg-black">
+                        <canvas id="sonar-canvas" class="absolute inset-0 w-full h-full"></canvas>
+                        <img src="643496.png" class="w-24 h-24 rounded-full object-cover z-10 border border-cyan-400 shadow-2xl">
+                    </div>
+                    <span class="text-[10px] text-[#00ffff] font-bold tracking-widest">// CAPT-CHCE MASTER MATRIX</span>
+
+                    <!-- Crossfader -->
+                    <div class="w-full px-4 text-center">
+                        <span class="text-xs font-bold text-white block mb-1">LIVE CROSSFADER</span>
+                        <input type="range" id="dj-crossfader" min="0" max="100" value="50" class="w-full">
+                        <span id="fader-val" class="text-[10px] text-gray-500 font-mono block mt-1">50% [CENTER]</span>
+                    </div>
+
+                </div>
+
+                <!-- Deck B (Mecha Node) -->
+                <div class="lg:col-span-4 bg-black/60 rounded-xl p-4 border border-purple-500/20 text-center">
+                    <span class="text-[10px] text-purple-400 font-bold block mb-2">// DECK B: MECHA KIBORG</span>
+                    <div class="relative aspect-square max-w-[240px] mx-auto overflow-hidden rounded-lg bg-zinc-950 border border-gray-800 flex items-center justify-center">
+                        <img id="deck-b-img" src="644007.png" class="object-cover w-full h-full opacity-0 transition-opacity">
+                    </div>
+                    <span class="text-[10px] text-gray-500 block mt-2">KIBORG OVERDRIVE // METAL</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 3: TIMELINE GLITCH STITCHER (Egipatska slika) ================= -->
+        <div id="stitcher-tab" class="tab-content hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                
+                <div class="lg:col-span-5 bg-black/60 rounded-xl p-4 border border-purple-900/30 text-center">
+                    <span class="text-[10px] text-[#ff0055] font-bold block mb-3">// GLITCHES GET STITCHES MATRIX</span>
+                    <img src="643697.jpg" class="w-full max-h-[320px] object-cover rounded-lg border border-gray-800 shadow-xl">
+                </div>
+
+                <div class="lg:col-span-7 flex flex-col gap-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="fa-solid fa-scissors text-[#ff0055]"></i> Timeline repair matrix</h3>
+                        <p class="text-xs text-gray-400 leading-relaxed mt-1">
+                            Po uzoru na timeline popravljačicu s tvoje slike, klikni na donje tipke kako bi u stvarnom vremenu ručno zašio klupske vremenske petlje i aktivirao stutter efekte.
+                        </p>
+                    </div>
+
+                    <!-- Stitcher Grid -->
+                    <div class="grid grid-cols-4 gap-3 bg-zinc-950 p-4 rounded-xl border border-gray-800">
+                        <button onclick="triggerStutter(4)" class="bg-[#ff0055]/10 border border-[#ff0055]/30 hover:bg-[#ff0055] hover:text-black transition-all p-3 rounded font-bold text-xs text-[#ff0055]">STITCH 1/4</button>
+                        <button onclick="triggerStutter(8)" class="bg-[#ff0055]/10 border border-[#ff0055]/30 hover:bg-[#ff0055] hover:text-black transition-all p-3 rounded font-bold text-xs text-[#ff0055]">STITCH 1/8</button>
+                        <button onclick="triggerStutter(16)" class="bg-[#ff0055]/10 border border-[#ff0055]/30 hover:bg-[#ff0055] hover:text-black transition-all p-3 rounded font-bold text-xs text-[#ff0055]">STITCH 1/16</button>
+                        <button onclick="triggerStutter(32)" class="bg-[#ff0055]/10 border border-[#ff0055]/30 hover:bg-[#ff0055] hover:text-black transition-all p-3 rounded font-bold text-xs text-[#ff0055]">STITCH 1/32</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ================= TAB 4: THE MEME & EMPTY ALLEY LABS ================= -->
+        <div id="meme-tab" class="tab-content hidden">
+            <h3 class="text-lg font-bold text-white mb-4"><i class="fa-solid fa-flask text-yellow-400 mr-2"></i> KLUPSKI DIJAGNOSTIČKI LABORATORIJ</h3>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Alley chair sub-bass generator -->
+                <div class="bg-black/60 rounded-xl p-4 border border-gray-800 flex flex-col items-center justify-between text-center min-h-[300px]">
+                    <div>
+                        <span class="text-[10px] text-yellow-400 font-bold block mb-2">// SUB-BASS GENERATOR: ALLEY CHAIR</span>
+                        <img src="643553.jpg" class="w-32 h-32 object-cover rounded-lg mx-auto border border-gray-800">
+                    </div>
+                    <p class="text-[10px] text-gray-500 leading-normal my-2">Udarac niske frekvencije inspiriran napuštenim stolicama u mračnim uličicama Dublina.</p>
+                    <button onmousedown="triggerChairSubBass()" class="w-full bg-[#00ffff] hover:bg-cyan-500 text-black font-extrabold text-xs py-2 rounded">PUSTI STOLICA BAS</button>
+                </div>
+
+                <!-- Hard to Swallow Pills (Croatian mem) -->
+                <div class="bg-black/60 rounded-xl p-4 border border-gray-800 flex flex-col items-center justify-between text-center min-h-[300px]">
+                    <div>
+                        <span class="text-[10px] text-[#ff0055] font-bold block mb-2">// DIJALEKTALNA DISTORZIJA: Ć VS Č</span>
+                        <img src="643597.jpg" class="w-32 h-32 object-cover rounded-lg mx-auto border border-gray-800">
+                    </div>
+                    <p class="text-[10px] text-gray-500 leading-normal my-2">Gura glasovni sintetizator u ekstremnu klupsku distorziju prskanja faza.</p>
+                    <button onclick="toggleCvsC_Distortion(this)" class="w-full bg-[#ff0055] hover:bg-red-500 text-white font-extrabold text-xs py-2 rounded">AKTIVIRAJ Ć/Č RAZOR</button>
+                </div>
+
+                <!-- Barefoot walk trigger -->
+                <div class="bg-black/60 rounded-xl p-4 border border-gray-800 flex flex-col items-center justify-between text-center min-h-[300px]">
+                    <div>
+                        <span class="text-[10px] text-green-400 font-bold block mb-2">// BAREFOOT CHROME OUTFLOW</span>
+                        <img src="643556.jpg" class="w-32 h-32 object-cover rounded-lg mx-auto border border-gray-800">
+                    </div>
+                    <p class="text-[10px] text-gray-500 leading-normal my-2">Simulacija bosonogog hodanja po hladnom, klupskom asfaltu punom neonskog zračenja.</p>
+                    <button onmousedown="triggerBarefootDrip()" class="w-full bg-[#00ff41] hover:bg-green-500 text-black font-extrabold text-xs py-2 rounded">PUSTI BAREFOOT DRIP</button>
+                </div>
+
+                <!-- AI Vibe Checker -->
+                <div class="bg-black/60 rounded-xl p-4 border border-purple-500/50 flex flex-col items-center justify-between text-center min-h-[300px]">
+                    <div>
+                        <span class="text-[10px] text-purple-400 font-bold block mb-2">// AI VIBE CHECKER</span>
+                        <div class="w-32 h-32 rounded-lg mx-auto border border-purple-800 bg-purple-900/30 flex items-center justify-center mb-2 shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+                            <i class="fa-solid fa-robot text-5xl text-purple-400"></i>
+                        </div>
+                    </div>
+                    <p id="criticText" class="text-[10px] text-gray-400 italic my-2">Pritisni za roast tvog beata od strane underground snoba.</p>
+                    <button id="criticBtn" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-extrabold text-xs py-2 rounded transition-all">VIBE CHECK ✨</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Pre-built presets na dnu -->
+    <div class="max-w-6xl w-full mt-4 flex items-center justify-start gap-3 bg-black/40 border border-gray-800 p-3 rounded-xl font-mono text-xs">
+        <span class="text-gray-500 uppercase">PRESETI:</span>
+        <button class="bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-1.5 rounded" data-preset="techno">Techno</button>
+        <button class="bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-1.5 rounded" data-preset="house">House</button>
+        <button class="bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-1.5 rounded" data-preset="trap">Trap</button>
+        <button class="bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-1.5 rounded" data-preset="breakbeat">Breakbeat</button>
+        <button class="bg-zinc-900 hover:bg-zinc-800 text-white px-3 py-1.5 rounded" data-preset="minimal">Minimal</button>
+    </div>
+
+    <!-- GALLERY MODAL -->
+    <div class="fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center hidden" id="galleryOverlay">
+        <div class="bg-[#08080f] border border-gray-800 rounded-2xl p-6 w-full max-w-lg">
+            <div class="flex justify-between items-center border-b border-gray-800 pb-3 mb-4">
+                <span class="text-xs font-bold text-white" id="galleryTarget">Replacing: Instrument</span>
+                <button onclick="closeGallery()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="flex gap-2 mb-4">
+                <button class="gtab bg-[#00ffff] text-black font-bold text-xs px-3 py-1.5 rounded active" data-gtab="synth">Sintisajzeri</button>
+                <button class="gtab bg-transparent border border-gray-800 text-white text-xs px-3 py-1.5 rounded" data-gtab="samples">Moji Uzorci</button>
+            </div>
+            
+            <div id="galleryContent" class="max-h-[300px] overflow-y-auto"></div>
+            
+            <div id="sampleContent" class="hidden">
+                <div class="border-2 border-dashed border-gray-800 rounded-xl p-8 text-center cursor-pointer hover:border-[#00ffff] transition-all" id="uploadZone">
+                    <span class="text-xs text-gray-400 block mb-1">Prevuci audio datoteke ovdje</span>
+                    <span class="text-[10px] text-gray-600 block">WAV, MP3, OGG</span>
+                    <input type="file" id="sampleInput" accept="audio/*" multiple class="hidden">
+                </div>
+                <div id="savedSamples" class="mt-4 max-h-[150px] overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom toast poruke -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#08080f] border border-[#00ff41] text-[#00ff41] text-xs font-mono px-4 py-2 rounded-lg opacity-0 transition-opacity pointer-events-none z-50 shadow-2xl"></div>
+
+    <script>
+        // --- DRUM CATALOGUE ---
+        const CATALOGUE=[
+            {id:'kick',name:'Kick 808',cat:'Kicks',synth:'kick808'},
+            {id:'kick2',name:'Kick Punchy',cat:'Kicks',synth:'kickPunch'},
+            {id:'kickSub',name:'Sub Kick',cat:'Kicks',synth:'kickSub'},
+            {id:'snare',name:'Snare Crack',cat:'Snares',synth:'snareCrack'},
+            {id:'snareRim',name:'Rim Shot',cat:'Snares',synth:'snareRim'},
+            {id:'hihat',name:'Closed HH',cat:'Hi-Hats',synth:'hhClosed'},
+            {id:'openhat',name:'Open HH',cat:'Hi-Hats',synth:'hhOpen'},
+            {id:'clap',name:'Clap Basic',cat:'Claps',synth:'clap'},
+            {id:'clapVerb',name:'Clap Verb',cat:'Claps',synth:'clapVerb'},
+            {id:'tom',name:'Tom Tone',cat:'Perc',synth:'tom'},
+            {id:'cowbell',name:'Cowbell Heavy',cat:'Perc',synth:'cowbell'},
+            {id:'clave',name:'Clave Click',cat:'Perc',synth:'clave'},
+            {id:'zap',name:'Zap Sound',cat:'FX',synth:'zap'},
+            {id:'laser',name:'Laser Beam',cat:'FX',synth:'laser'},
+            {id:'glitch',name:'Glitch Cluster',cat:'FX',synth:'glitch'}
+        ];
+        const CATS=[...new Set(CATALOGUE.map(i=>i.cat))];
+
+        const FX_DEFS=[
+            {id:'filter',label:'Filter',icon:'🌊'},
+            {id:'echo',label:'Odjek',icon:'🔁'},
+            {id:'distort',label:'Distorzija',icon:'⚡'},
+            {id:'haunted',label:'Haunted',icon:'👻'},
+            {id:'flanger',label:'Flanger',icon:'🌀'},
+            {id:'delay',label:'Kašnjenje',icon:'⏱'}
+        ];
+
+        // --- STATE & AUDIO ---
+        let STEPS=16;
+        let tracks=['kick','snare','hihat','openhat','clap'];
+        let pattern={};
+        tracks.forEach(id=>pattern[id]=new Array(STEPS).fill(0));
+        let trackParams={};
+        tracks.forEach(id=>trackParams[id]={pitch:1,decay:.5});
+
+        let audioCtx, isPlaying=false, currentStep=0, intervalId=null;
+        let masterGain, fxChainInput, fxNodes={};
+        const fxState={};
+        FX_DEFS.forEach(f=>fxState[f.id]={locked:false,active:false});
+
+        // Slike baka i kiborga
+        const grannyImages = ["644016.png", "644017.png", "644018.png", "644019.png", "644020.png"];
+        const robotImages = ["644007.png", "644008.png", "644009.png", "644011.png", "644012.png", "644014.png", "644015.png"];
+        let frameIndexA = 0;
+        let frameIndexB = 0;
+
+        // Custom modifikatori (ć vs č i sub)
+        let isCvsC_Distortion = false;
+
+        // Recorder & Sample state
+        let mediaRecorder=null, recChunks=[], isRecording=false, recStart=0, recTimerInterval=null, lastBlob=null;
+        let userSamples=[];
+        let swapTargetIdx=null;
+        let galleryTab='synth';
+
+        // Presets
+        const PRESETS={
+            techno:{kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
+            house:{kick:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],snare:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],hihat:[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,0],openhat:[0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1],clap:[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0]},
+            trap:{kick:[1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],hihat:[1,0,1,0,1,0,1,0,1,1,0,1,0,1,1,1],openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0],clap:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]},
+            breakbeat:{kick:[1,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0],snare:[0,0,0,0,1,0,0,0,0,1,0,0,1,0,0,0],hihat:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0],clap:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+            minimal:{kick:[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],snare:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],hihat:[0,0,0,1,0,0,0,1,0,0,0,1,0,0,0,1],openhat:[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],clap:[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0]}
+        };
+
+        // --- WEB AUDIO API ENGINE ---
+        function getCtx(){
+            if(!audioCtx){
+                audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+                setupChain();
+            }
+            return audioCtx;
+        }
+
+        function setupChain(){
+            masterGain=audioCtx.createGain();
+            masterGain.gain.value=0.8;
+            masterGain.connect(audioCtx.destination);
+            
+            fxChainInput=audioCtx.createGain();
+            FX_DEFS.forEach(f=>{fxNodes[f.id]=createFxNode(f.id);});
+            rewireChain();
+        }
+
+        function createFxNode(id){
+            const ctx=audioCtx;
+            const input=ctx.createGain(); input.gain.value=1;
+            const dry=ctx.createGain(); dry.gain.value=1;
+            const wet=ctx.createGain(); wet.gain.value=0;
+            const output=ctx.createGain(); output.gain.value=1;
+            
+            input.connect(dry); dry.connect(output);
+            input.connect(wet);
+            
+            let fxOut;
+            switch(id){
+                case 'filter':
+                    const f=ctx.createBiquadFilter(); f.type='lowpass'; f.frequency.value=20000; f.Q.value=1;
+                    wet.connect(f); fxOut=f; break;
+                case 'echo':
+                    const d=ctx.createDelay(1); d.delayTime.value=0.25;
+                    const fb=ctx.createGain(); fb.gain.value=0.55;
+                    wet.connect(d); d.connect(fb); fb.connect(d); fxOut=d; break;
+                case 'distort':
+                    const w=ctx.createWaveShaper(); w.curve=makeDistCurve(400); w.oversample='4x';
+                    wet.connect(w); fxOut=w; break;
+                case 'haunted':
+                    const dH=ctx.createDelay(0.1); dH.delayTime.value=0.02;
+                    const lfo=ctx.createOscillator(); const lg=ctx.createGain(); lg.gain.value=0.015;
+                    lfo.frequency.value=0.8; lfo.connect(lg); lg.connect(dH.delayTime); lfo.start();
+                    const rev=ctx.createConvolver(); rev.buffer=makeImpulse(ctx,2,0.5);
+                    wet.connect(dH); dH.connect(rev); fxOut=rev; break;
+                case 'flanger':
+                    const dF=ctx.createDelay(0.02); dF.delayTime.value=0.005;
+                    const lfoF=ctx.createOscillator(); const lgF=ctx.createGain(); lgF.gain.value=0.004;
+                    lfoF.frequency.value=0.3; lfoF.connect(lgF); lgF.connect(dF.delayTime); lfoF.start();
+                    const fbF=ctx.createGain(); fbF.gain.value=0.7;
+                    wet.connect(dF); dF.connect(fbF); fbF.connect(dF); fxOut=dF; break;
+                case 'delay':
+                    const dD=ctx.createDelay(1); dD.delayTime.value=0.375;
+                    const fbD=ctx.createGain(); fbD.gain.value=0.5;
+                    wet.connect(dD); dD.connect(fbD); fbD.connect(dD); fxOut=dD; break;
+            }
+            if(fxOut) fxOut.connect(output);
+            return {input, dry, wet, output, id};
+        }
+
+        function rewireChain(){
+            try { fxChainInput.disconnect(); } catch(e){}
+            let prev=fxChainInput;
+            FX_DEFS.forEach(f=>{
+                const n=fxNodes[f.id];
+                try { prev.disconnect(); } catch(e){}
+                prev.connect(n.input); prev=n.output;
+            });
+            prev.connect(masterGain);
+        }
+
+        function makeDistCurve(amt){
+            const n=256, c=new Float32Array(n);
+            for(let i=0; i<n; i++){
+                const x=(i*2/n)-1;
+                c[i]=(Math.PI+amt)*x/(Math.PI+amt*Math.abs(x));
+            }
+            return c;
+        }
+
+        function makeImpulse(ctx,dur,decay){
+            const len=ctx.sampleRate*dur;
+            const buf=ctx.createBuffer(2,len,ctx.sampleRate);
+            for(let c=0; c<2; c++){
+                const d=buf.getChannelData(c);
+                for(let i=0; i<len; i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/len,decay);
+            }
+            return buf;
+        }
+
+        function activateFx(id){
+            const n=fxNodes[id]; if(!n) return;
+            n.dry.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
+            n.wet.gain.setTargetAtTime(1, audioCtx.currentTime, 0.05);
+        }
+
+        function deactivateFx(id){
+            const n=fxNodes[id]; if(!n) return;
+            n.dry.gain.setTargetAtTime(1, audioCtx.currentTime, 0.08);
+            n.wet.gain.setTargetAtTime(0, audioCtx.currentTime, 0.08);
+        }
+
+        function dest(){ getCtx(); return fxChainInput; }
+
+        function oscHit(type,freq,dur,gainVal,freqEnd,pitch=1){
+            const ctx=getCtx(), o=ctx.createOscillator(), g=ctx.createGain(), now=ctx.currentTime;
+            o.type=type; o.frequency.setValueAtTime(freq*pitch, now);
+            if(freqEnd) o.frequency.exponentialRampToValueAtTime(freqEnd*pitch, now+dur);
+            
+            // Ako je dialektalna distorzija ć vs č uključena, dodaj masivni waveshaper na zvuk
+            if (isCvsC_Distortion) {
+                const distNode = ctx.createWaveShaper();
+                distNode.curve = makeDistCurve(1500);
+                o.connect(distNode);
+                distNode.connect(g);
+            } else {
+                o.connect(g);
+            }
+            
+            g.connect(dest());
+            g.gain.setValueAtTime(gainVal, now);
+            g.gain.exponentialRampToValueAtTime(0.001, now+dur);
+            o.start(now); o.stop(now+dur);
+        }
+
+        function noiseHit(dur,gainVal){
+            const ctx=getCtx();
+            const buf=ctx.createBuffer(1,ctx.sampleRate*dur,ctx.sampleRate);
+            const d=buf.getChannelData(0);
+            for(let i=0; i<buf.length; i++) d[i]=Math.random()*2-1;
+            const s=ctx.createBufferSource(); s.buffer=buf;
+            const g=ctx.createGain(), now=ctx.currentTime;
+            
+            s.connect(g); g.connect(dest());
+            g.gain.setValueAtTime(gainVal, now);
+            g.gain.exponentialRampToValueAtTime(0.001, now+dur);
+            s.start(now); s.stop(now+dur);
+        }
+
+        const SYNTHS={
+            kick808(p){ oscHit('sine', 150, 0.5*(1+p.decay), 1, 0.01, p.pitch); },
+            kickPunch(p){ oscHit('sine', 200, 0.3*(1+p.decay), 1, 40, p.pitch); },
+            kickSub(p){ oscHit('sine', 60, 0.8*(1+p.decay), 0.8, 20, p.pitch); },
+            snareCrack(p){ noiseHit(0.2*(1+p.decay), 0.25); oscHit('sine', 200, 0.1, 0.35, 100, p.pitch); },
+            snareRim(p){ oscHit('square', 900*p.pitch, 0.05, 0.3); oscHit('sine', 300*p.pitch, 0.05, 0.15); },
+            hhClosed(p){ oscHit('square', 800*p.pitch, 0.05*(1+p.decay), 0.12); },
+            hhOpen(p){ oscHit('square', 800*p.pitch, 0.35*(1+p.decay), 0.1); },
+            clap(p){ noiseHit(0.12*(1+p.decay), 0.35); },
+            clapVerb(p){ noiseHit(0.4*(1+p.decay), 0.18); },
+            tom(p){ oscHit('sine', 120, 0.3*(1+p.decay), 0.7, 50, p.pitch); },
+            cowbell(p){ oscHit('square', 562*p.pitch, 0.5, 0.2); oscHit('square', 845*p.pitch, 0.5, 0.2); },
+            clave(p){ oscHit('triangle', 2500*p.pitch, 0.07, 0.4); },
+            zap(p){ oscHit('sawtooth', 1200*p.pitch, 0.1, 0.4, 200, p.pitch); },
+            laser(p){ oscHit('sine', 2000*p.pitch, 0.3, 0.35, 100, p.pitch); },
+            glitch(){ for(let i=0; i<3; i++) setTimeout(()=>noiseHit(0.02,0.3), i*25); }
+        };
+
+        function playSound(id){
+            const p=trackParams[id]||{pitch:1,decay:0.5};
+            const us=userSamples.find(s=>s.id===id);
+            if(us&&us.buffer){
+                const ctx=getCtx(), src=ctx.createBufferSource(), g=ctx.createGain();
+                src.buffer=us.buffer; src.playbackRate.value=p.pitch||1;
+                src.connect(g); g.connect(dest()); src.start(); return;
+            }
+            const def=CATALOGUE.find(c=>c.id===id);
+            if(def&&SYNTHS[def.synth]) SYNTHS[def.synth](p);
+        }
+
+        // --- SUB-BASS ALLEY CHAIR AND BAREFOOT TRIGGERS ---
+        function triggerChairSubBass() {
+            // Težak, duboki sub bass (25Hz) s izobličenjem koji simulira praznu ulicu s tvoje slike
+            oscHit('sine', 40, 1.2, 1.5, 10);
+            showToast("⚠️ SUB_BASS DETECTED: ALLEY_CHAIR_STATIONARY");
+        }
+
+        function triggerBarefootDrip() {
+            // Neonski metalni drip s brzim frekvencijskim padom
+            oscHit('triangle', 3200, 0.1, 0.8, 100);
+            setTimeout(() => {
+                oscHit('triangle', 2500, 0.08, 0.5, 80);
+            }, 60);
+            showToast("👣 BAREFOOT_ACCELERATION: SHICK_DRIP");
+        }
+
+        function toggleCvsC_Distortion(btn) {
+            isCvsC_Distortion = !isCvsC_Distortion;
+            if (isCvsC_Distortion) {
+                btn.className = "w-full bg-red-600 text-white font-extrabold text-xs py-2 rounded border border-white animate-pulse";
+                btn.innerText = "Ć/Č RAZOR: ACTIVE_OVERLOAD";
+                showToast("💊 PILL_SWALLOWED: Ć and Č are NOW MERGED");
+            } else {
+                btn.className = "w-full bg-[#ff0055] hover:bg-red-500 text-white font-extrabold text-xs py-2 rounded";
+                btn.innerText = "AKTIVIRAJ Ć/Č RAZOR";
+                showToast("💊 PILL_FLUSHED: DISTORTION DISABLED");
+            }
+        }
+
+        // --- THEMED STUTTER MATRIX ---
+        function triggerStutter(rate) {
+            getCtx();
+            const originalBpm = parseInt(document.getElementById('tempoSlider').value);
+            const intervalTime = (60 / originalBpm / rate) * 1000;
+            
+            showToast(`🪡 TIMELINE STITCH ACTIVE: 1/${rate} RATE`);
+            
+            // Privremeno prebaci BPM sekvencera
+            updateTempo(originalBpm * 2);
+            setTimeout(() => {
+                updateTempo(originalBpm);
+            }, 1000);
+        }
+
+        // --- BUILD SEQUENCER UI ---
+        function instName(id){
+            const us=userSamples.find(s=>s.id===id); if(us) return us.name;
+            const def=CATALOGUE.find(c=>c.id===id); return def?def.name:id;
+        }
+
+        function buildSequencer(){
+            const seq=document.getElementById('sequencer'); seq.innerHTML='';
+            const labelCols='110px', knobCols='80px', stepCols=`repeat(${STEPS},1fr)`;
+            
+            tracks.forEach((id,ti)=>{
+                const row=document.createElement('div');
+                row.className='grid gap-2 items-center mb-2';
+                row.style.gridTemplateColumns=`${labelCols} ${knobCols} ${stepCols}`;
+
+                // Label
+                const lw=document.createElement('div'); lw.className='flex items-center gap-1.5';
+                const nm=document.createElement('div'); nm.className='text-[10px] uppercase font-bold text-gray-400 truncate'; nm.textContent=instName(id);
+                const sb=document.createElement('button'); sb.className='text-[10px] bg-zinc-900 border border-gray-800 text-cyan-400 rounded px-1'; sb.innerText='⇄'; sb.onclick=()=>openGallery(ti);
+                const rb=document.createElement('button'); rb.className='text-[10px] bg-zinc-900 border border-gray-800 text-red-500 rounded px-1'; rb.innerText='✕';
+                rb.onclick=()=>{
+                    if(tracks.length<=1) return;
+                    delete pattern[id]; delete trackParams[id]; tracks.splice(ti,1); buildSequencer();
+                    document.getElementById('trackCount').textContent=`${tracks.length} / 8 tracks`;
+                };
+                lw.appendChild(nm); lw.appendChild(sb); lw.appendChild(rb); row.appendChild(lw);
+
+                // Knobs
+                const kw=document.createElement('div'); kw.className='flex gap-1 items-center';
+                const p=trackParams[id]||{pitch:1,decay:0.5};
+                ['pitch','decay'].forEach(k=>{
+                    const wrap=document.createElement('div'); wrap.className='flex flex-col items-center';
+                    const sl=document.createElement('input'); sl.type='range'; sl.className='w-10 h-1 bg-gray-800';
+                    sl.min=k==='pitch'?'.25':'0'; sl.max=k==='pitch'?'3':'1'; sl.step='.01'; sl.value=p[k];
+                    sl.oninput=e=>{
+                        if(!trackParams[id]) trackParams[id]={pitch:1,decay:0.5};
+                        trackParams[id][k]=parseFloat(e.target.value);
+                    };
+                    wrap.appendChild(sl); kw.appendChild(wrap);
+                });
+                row.appendChild(kw);
+
+                // Steps
+                if(!pattern[id]||pattern[id].length!==STEPS) pattern[id]=new Array(STEPS).fill(0);
+                for(let s=0; s<STEPS; s++){
+                    const step=document.createElement('div');
+                    step.className='step rounded bg-zinc-950 border border-gray-900'+(pattern[id][s]?' on':'');
+                    step.dataset.ti=ti; step.dataset.s=s;
+                    step.onclick=()=>{
+                        pattern[id][s]=pattern[id][s]?0:1;
+                        step.classList.toggle('on');
+                    };
+                    row.appendChild(step);
+                }
+                seq.appendChild(row);
+            });
+        }
+
+        // --- PLAYBACK ENGINE ---
+        function tick(){
+            document.querySelectorAll('.step.playing').forEach(e=>e.classList.remove('playing'));
+            tracks.forEach((id,ti)=>{
+                const el=document.querySelector(`#sequencer div:nth-child(${ti+1}) .step:nth-child(${sIndexOffset(currentStep)})`);
+                if(el) el.classList.add('playing');
+                if(pattern[id]&&pattern[id][currentStep]) playSound(id);
+            });
+
+            // Vizualne glitch rotacije i animacije za DJ deckove
+            if (isPlaying) {
+                const faderVal = parseInt(document.getElementById('dj-crossfader').value);
+                if (faderVal < 40) {
+                    frameIndexA = (frameIndexA + 1) % grannyImages.length;
+                    document.getElementById('deck-a-img').src = grannyImages[frameIndexA];
+                } else if (faderVal > 60) {
+                    frameIndexB = (frameIndexB + 1) % robotImages.length;
+                    document.getElementById('deck-b-img').src = robotImages[frameIndexB];
+                }
+                // Sonar radar pulsira
+                sonarPulseRadius = 1;
+            }
+
+            currentStep=(currentStep+1)%STEPS;
+        }
+
+        function sIndexOffset(step) {
+            // Pomak za dohvaćanje elementa u gridu (label + knobs)
+            return step + 3;
+        }
+
+        function togglePlayback(){
+            getCtx();
+            const btn=document.getElementById('playBtn');
+            if(!isPlaying){
+                isPlaying=true; btn.innerText='⏸ PAUSE';
+                btn.className='flex-1 bg-yellow-600 hover:bg-yellow-700 text-black font-extrabold py-3 px-4 rounded text-xs transition-all';
+                tick(); playInterval=setInterval(tick, (60/bpm/4)*1000);
+            } else {
+                isPlaying=false; btn.innerText='▶ PLAY';
+                btn.className='flex-1 bg-green-600 hover:bg-green-700 text-black font-extrabold py-3 px-4 rounded text-xs transition-all';
+                clearInterval(playInterval);
+            }
+        }
+
+        function stopPlayback(){
+            isPlaying=false; clearInterval(playInterval);
+            document.getElementById('playBtn').innerText='▶ PLAY';
+            document.getElementById('playBtn').className='flex-1 bg-green-600 hover:bg-green-700 text-black font-extrabold py-3 px-4 rounded text-xs transition-all';
+            currentStep=0; document.querySelectorAll('.step.playing').forEach(e=>e.classList.remove('playing'));
+        }
+
+        function clearSequence(){
+            tracks.forEach(id=>{ if(pattern[id]) pattern[id].fill(0); });
+            buildSequencer();
+        }
+
+        // --- RADAR / SONAR VIZUALIZATOR (CAPT-CHCE) ---
+        const sonarCanvas = document.getElementById('sonar-canvas');
+        const sCtx = sonarCanvas.getContext('2d');
+        let sonarPulseRadius = 1;
+
+        function resizeSonarCanvas() {
+            sonarCanvas.width = sonarCanvas.parentElement.clientWidth;
+            sonarCanvas.height = sonarCanvas.parentElement.clientHeight;
+        }
+        window.addEventListener('resize', resizeSonarCanvas);
+        resizeSonarCanvas();
+
+        function drawSonar() {
+            sCtx.clearRect(0, 0, sonarCanvas.width, sonarCanvas.height);
+            const centerX = sonarCanvas.width / 2;
+            const centerY = sonarCanvas.height / 2;
+
+            if (isPlaying) {
+                // Nacrtaj koncentrične cyber neonske krugove inspirirane CAPT-CHCE visualom
+                sCtx.beginPath();
+                sCtx.arc(centerX, centerY, sonarPulseRadius * 25, 0, 2 * Math.PI);
+                sCtx.strokeStyle = `rgba(0, 255, 255, ${1 - sonarPulseRadius / 3})`;
+                sCtx.lineWidth = 2;
+                sCtx.stroke();
+
+                sCtx.beginPath();
+                sCtx.arc(centerX, centerY, sonarPulseRadius * 15, 0, 2 * Math.PI);
+                sCtx.strokeStyle = `rgba(255, 0, 85, ${1 - sonarPulseRadius / 3})`;
+                sCtx.lineWidth = 1;
+                sCtx.stroke();
+
+                sonarPulseRadius += 0.05;
+                if (sonarPulseRadius > 3) sonarPulseRadius = 0.5;
+            }
+            requestAnimationFrame(drawSonar);
+        }
+        drawSonar();
+
+        // --- FX INTERFACES ---
+        function buildFxRow(){
+            const row=document.getElementById('fxRow'); row.innerHTML='';
+            FX_DEFS.forEach(f=>{
+                const pad=document.createElement('div'); pad.className='relative border border-gray-800 rounded-lg p-3 bg-zinc-950 flex flex-col items-center justify-between min-h-[85px]';
+                const hold=document.createElement('button'); hold.className='text-xs font-bold text-white tracking-wider flex flex-col items-center gap-1 cursor-pointer';
+                hold.innerHTML=`<span class="text-xl">${f.icon}</span>${f.label}`;
+                const lock=document.createElement('button'); lock.className='text-[9px] bg-black/60 border border-gray-800 text-gray-500 rounded px-2 py-0.5 mt-2'; lock.innerHTML='🔒 Lock';
+                
+                pad.appendChild(hold); pad.appendChild(lock); row.appendChild(pad);
+
+                const startHold=()=>{
+                    getCtx(); if(fxState[f.id].locked) return;
+                    fxState[f.id].active=true; pad.className='relative border border-[#00ffff] rounded-lg p-3 bg-cyan-950/20 flex flex-col items-center justify-between min-h-[85px]';
+                    activateFx(f.id);
+                };
+                const endHold=()=>{
+                    if(fxState[f.id].locked) return;
+                    fxState[f.id].active=false; pad.className='relative border border-gray-800 rounded-lg p-3 bg-zinc-950 flex flex-col items-center justify-between min-h-[85px]';
+                    deactivateFx(f.id);
+                };
+
+                hold.onmousedown=startHold; hold.onmouseup=endHold; hold.onmouseleave=endHold;
+                hold.ontouchstart=(e)=>{ e.preventDefault(); startHold(); };
+                hold.ontouchend=endHold;
+
+                lock.onclick=()=>{
+                    getCtx(); const st=fxState[f.id]; st.locked=!st.locked;
+                    if(st.locked){
+                        pad.className='relative border border-[#ff0055] rounded-lg p-3 bg-red-950/20 flex flex-col items-center justify-between min-h-[85px]';
+                        lock.innerText='🔓 Unlock'; activateFx(f.id);
+                    } else {
+                        pad.className='relative border border-gray-800 rounded-lg p-3 bg-zinc-950 flex flex-col items-center justify-between min-h-[85px]';
+                        lock.innerText='🔒 Lock'; deactivateFx(f.id);
+                    }
+                }
+            });
+        }
+
+        // --- CROSS DJ BLENDING ---
+        document.getElementById('dj-crossfader').oninput=function(){
+            const val = parseInt(this.value);
+            document.getElementById('fader-val').innerText = `${val}% [${val === 50 ? 'CENTER' : val < 50 ? 'DECK_A_PREF' : 'DECK_B_PREF'}]`;
+            
+            // Omjeri prikaza slika baka i robota u stvarnom vremenu
+            document.getElementById('deck-a-img').style.opacity = (1 - val/100).toFixed(2);
+            document.getElementById('deck-b-img').style.opacity = (val/100).toFixed(2);
+        };
+
+        // --- GEMINI INTEGRACIJA ---
+        const apiKey = ""; // Prazan ključ za radno okruženje
+
+        async function fetchGemini(prompt) {
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            const payload = {
+                contents: [{ parts: [{ text: prompt }] }]
+            };
+            const delays = [1000, 2000, 4000, 8000, 16000];
+
+            for (let i = 0; i < 5; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error('API Error');
+                    const result = await response.json();
+                    return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                } catch (error) {
+                    if (i === 4) throw new Error("Generiranje neuspješno nakon više pokušaja.");
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+            }
+        }
+
+        document.getElementById('generateBtn').onclick = async function() {
+            const val = document.getElementById('beatInput').value.trim();
+            if(!val) return;
+            this.disabled = true; this.innerText = 'WAIT...';
+            try {
+                const res = await fetchGemini(`Classify this drum beat description into exactly one of: techno, house, trap, breakbeat, minimal.\n"${val}"\nReply with only the single word.`);
+                const key = res.trim().toLowerCase().replace(/[^a-z]/g,'');
+                const p = PRESETS[key] || PRESETS.techno;
+                tracks.forEach(id => {
+                    const base = id.replace(/\d+$/,'');
+                    pattern[id] = [...(p[base] || p[id] || new Array(STEPS).fill(0))];
+                });
+                buildSequencer();
+                showToast(`Generated: ${key.toUpperCase()}`);
+            } catch(e) {
+                showToast("Generating error", "err");
+            } finally {
+                this.disabled = false; this.innerText = 'GENERATE';
+            }
+        };
+
+        document.getElementById('mutateBtn').onclick = function() {
+            tracks.forEach(id => {
+                pattern[id] = pattern[id].map(v => {
+                    if (Math.random() < 0.15) return v ? 0 : 1;
+                    return v;
+                });
+            });
+            buildSequencer();
+            showToast("Pattern mutated ⟳");
+        };
+
+        document.getElementById('aiTakeoverBtn').onclick = async function() {
+            this.disabled = true; this.innerText = 'CREATING...';
+            try {
+                const res = await fetchGemini(`Create a drum machine pattern as JSON. Return ONLY a JSON object with these exact keys: kick, snare, hihat, openhat, clap. Each key maps to an array of exactly ${STEPS} values (0 or 1). Reply with ONLY the JSON, no explanation.`);
+                const clean = res.replace(/```json|```/g,'').trim();
+                const p = JSON.parse(clean);
+                Object.keys(p).forEach(k => {
+                    if(tracks.includes(k) && Array.isArray(p[k])) pattern[k] = p[k].slice(0,STEPS);
+                });
+                buildSequencer();
+                showToast("AI override successful 🤖");
+            } catch(e) {
+                // Fallback nasumično generiranje ako API padne
+                tracks.forEach(id => {
+                    pattern[id] = Array.from({length:STEPS}, () => Math.random() < 0.2 ? 1 : 0);
+                });
+                buildSequencer();
+                showToast("Fallback AI pattern loaded");
+            } finally {
+                this.disabled = false; this.innerText = 'AI OVERRIDE';
+            }
+        };
+
+        // Utility: Convert raw PCM (from Gemini TTS) to WAV buffer
+        function pcmToWav(pcmData, sampleRate) {
+            const numChannels = 1;
+            const byteRate = sampleRate * numChannels * 2;
+            const blockAlign = numChannels * 2;
+            const buffer = new ArrayBuffer(44 + pcmData.length);
+            const view = new DataView(buffer);
+            const writeString = (view, offset, string) => {
+                for (let i = 0; i < string.length; i++) view.setUint8(offset + i, string.charCodeAt(i));
+            };
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + pcmData.length, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, pcmData.length, true);
+            const pcmBytes = new Uint8Array(pcmData);
+            new Uint8Array(buffer, 44).set(pcmBytes);
+            return buffer;
+        }
+
+        // Hype Man Drop (Gemini TTS API)
+        document.getElementById('hypeDropBtn').onclick = async function() {
+            this.disabled = true; this.innerText = 'WAIT...';
+            try {
+                showToast("Generating AI Hype Drop...");
+                const hypeText = `Say energetically: Let's go Dublin! We are cruising at ${bpm} beats per minute! Drop the bass!`;
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent?key=${apiKey}`;
+                const payload = {
+                    contents: [{ parts: [{ text: hypeText }] }],
+                    generationConfig: {
+                        responseModalities: ["AUDIO"],
+                        speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } } }
+                    }
+                };
+                
+                const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if(!response.ok) throw new Error("TTS API Error");
+                const result = await response.json();
+                
+                const base64Audio = result.candidates[0].content.parts[0].inlineData.data;
+                const binaryString = atob(base64Audio);
+                const pcmBytes = new Uint8Array(binaryString.length);
+                for (let i = 0; i < binaryString.length; i++) pcmBytes[i] = binaryString.charCodeAt(i);
+                
+                const wavBuffer = pcmToWav(pcmBytes.buffer, 24000);
+                const ctx = getCtx();
+                const decodedAudio = await ctx.decodeAudioData(wavBuffer);
+                const source = ctx.createBufferSource();
+                source.buffer = decodedAudio;
+                
+                // Route through a slight delay and direct out for clarity
+                const delayNode = ctx.createDelay(1); delayNode.delayTime.value = 0.3;
+                const delayGain = ctx.createGain(); delayGain.gain.value = 0.2;
+                source.connect(delayNode); delayNode.connect(delayGain); delayGain.connect(masterGain);
+                source.connect(masterGain);
+                
+                source.start();
+                showToast("Hype Drop deployed!");
+            } catch (e) {
+                console.error(e);
+                showToast("Hype Drop failed", "err");
+            } finally {
+                this.disabled = false; this.innerHTML = '🎤 HYPE DROP ✨';
+            }
+        };
+
+        // AI Vibe Checker Critic (Gemini Text API)
+        const criticBtn = document.getElementById('criticBtn');
+        if (criticBtn) {
+            criticBtn.onclick = async function() {
+                this.disabled = true; this.innerText = 'LISTENING...';
+                try {
+                    let seqStr = `BPM: ${bpm}\nTrake i udarci u ${STEPS} koraka:\n`;
+                    tracks.forEach(id => {
+                        const hits = pattern[id].reduce((sum, val) => sum + val, 0);
+                        seqStr += `- ${id}: ${hits} hits\n`;
+                    });
+                    
+                    const prompt = `You are an elite, slightly snobby underground club DJ from Dublin. Review this minimal drum machine pattern I made. \n${seqStr}\nGive a witty, very brief (max 2 short sentences) critique or roast in Croatian. Be sarcastic but fun.`;
+                    const res = await fetchGemini(prompt);
+                    
+                    const textEl = document.getElementById('criticText');
+                    textEl.innerText = `"${res}"`;
+                    textEl.className = "text-[11px] text-[#00ffff] font-bold my-2 leading-relaxed";
+                    showToast("Vibe Check completed");
+                } catch (e) {
+                    showToast("Critic is busy", "err");
+                } finally {
+                    this.disabled = false; this.innerText = 'VIBE CHECK ✨';
+                }
+            };
+        }
+
+        // --- NAV TAB INTERFACE ---
+        function switchTab(tabId, btn) {
+            document.querySelectorAll('.tab-content').forEach(c => c.className = "tab-content hidden");
+            document.getElementById(tabId).className = "tab-content block";
+            
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.className = "tab-btn px-4 py-1.5 rounded text-xs font-bold text-gray-400 hover:text-white";
+            });
+            btn.className = "tab-btn px-4 py-1.5 rounded text-xs font-bold bg-[#ff0055] text-white";
+        }
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(msg, type="ok") {
+            const el = document.getElementById('toast');
+            el.innerText = msg;
+            el.className = `fixed bottom-6 left-1/2 -translate-x-1/2 bg-[#08080f] border ${type==='ok' ? 'border-[#00ff41] text-[#00ff41]' : 'border-[#ff0055] text-[#ff0055]'} text-xs font-mono px-4 py-2 rounded-lg opacity-100 transition-opacity z-50 shadow-2xl`;
+            setTimeout(() => { el.className = "opacity-0 pointer-events-none"; }, 2500);
+        }
+
+        // --- EVENT LISTENERS ---
+        document.getElementById('playBtn').onclick = togglePlayback;
+        document.getElementById('stopBtn').onclick = stopPlayback;
+        document.getElementById('clearBtn').onclick = clearSequence;
+        
+        let bpm = 120;
+        document.getElementById('tempoSlider').oninput = function() {
+            bpm = parseInt(this.value);
+            document.getElementById('tempoVal').innerText = `${bpm} BPM`;
+            if (isPlaying) {
+                clearInterval(playInterval);
+                playInterval = setInterval(tick, (60/bpm/4)*1000);
+            }
+        };
+
+        function updateTempo(newBpm) {
+            bpm = newBpm;
+            document.getElementById('tempoSlider').value = newBpm;
+            document.getElementById('tempoVal').innerText = `${bpm} BPM`;
+            if (isPlaying) {
+                clearInterval(playInterval);
+                playInterval = setInterval(tick, (60/bpm/4)*1000);
+            }
+        }
+
+        document.getElementById('masterVol').oninput = function() {
+            const v = parseFloat(this.value);
+            document.getElementById('masterVolVal').textContent = Math.round(v*100) + '%';
+            if (masterGain) masterGain.gain.setTargetAtTime(v, audioCtx.currentTime, 0.05);
+        };
+
+        // Step buttons
+        document.querySelectorAll('.step-btn').forEach(b => b.onclick = function() {
+            const n = parseInt(this.dataset.steps);
+            STEPS = n;
+            document.querySelectorAll('.step-btn').forEach(x => x.className = "step-btn px-2.5 py-1 rounded text-xs font-bold text-gray-400 hover:text-white");
+            this.className = "step-btn px-2.5 py-1 rounded text-xs font-bold text-white bg-[#ff0055]";
+            tracks.forEach(id => {
+                const old = pattern[id] || [];
+                if (old.length < n) pattern[id] = [...old, ...new Array(n - old.length).fill(0)];
+                else pattern[id] = old.slice(0, n);
+            });
+            buildSequencer();
+            showToast(`${n} steps configured`);
+        });
+
+        // Preset loading
+        document.querySelectorAll('[data-preset]').forEach(b => b.onclick = function() {
+            const p = PRESETS[this.dataset.preset]; if(!p) return;
+            tracks.forEach(id => {
+                const base = id.replace(/\d+$/,'');
+                pattern[id] = [...(p[base] || p[id] || new Array(STEPS).fill(0))];
+            });
+            buildSequencer();
+            showToast(`Preset: ${this.dataset.preset.toUpperCase()}`);
+        });
+
+        // Add track
+        document.getElementById('addTrackBtn').onclick = function() {
+            if(tracks.length >= 8) { showToast("Maksimalno 8 traka", "err"); return; }
+            const available = CATALOGUE.filter(c => !tracks.includes(c.id));
+            if(!available.length) return;
+            const def = available[0]; tracks.push(def.id);
+            if(!pattern[def.id]) pattern[def.id] = new Array(STEPS).fill(0);
+            if(!trackParams[def.id]) trackParams[def.id] = {pitch:1,decay:0.5};
+            buildSequencer();
+            document.getElementById('trackCount').innerText = `${tracks.length} / 8 tracks`;
+            showToast(`Added: ${def.name}`);
+        };
+
+        // Gallery Modal & Custom Sample Support
+        function openGallery(ti) {
+            swapTargetIdx = ti;
+            document.getElementById('galleryTarget').innerText = `Uređivanje trake: ${instName(tracks[ti])}`;
+            renderGalleryTab();
+            document.getElementById('galleryOverlay').className = "fixed inset-0 bg-black/80 backdrop-blur z-50 flex items-center justify-center";
+        }
+        function closeGallery() {
+            document.getElementById('galleryOverlay').className = "hidden";
+        }
+        function renderGalleryTab() {
+            const content = document.getElementById('galleryContent'); content.innerHTML = '';
+            document.getElementById('galleryContent').className = galleryTab === 'synth' ? "block" : "hidden";
+            document.getElementById('sampleContent').className = galleryTab === 'samples' ? "block" : "hidden";
+
+            if (galleryTab === 'synth') {
+                CATS.forEach(cat => {
+                    const cl = document.createElement('div'); cl.className = 'text-[10px] text-gray-500 uppercase mt-4 mb-2'; cl.innerText = cat; content.appendChild(cl);
+                    const grid = document.createElement('div'); grid.className = 'grid grid-cols-3 gap-2';
+                    CATALOGUE.filter(i => i.cat === cat).forEach(def => {
+                        const card = document.createElement('button');
+                        card.className = "bg-zinc-950 hover:bg-zinc-900 border border-gray-800 text-left p-2.5 rounded transition-all";
+                        card.innerHTML = `<span class="text-xs text-white font-bold block">${def.name}</span><span class="text-[9px] text-gray-500">${def.cat}</span>`;
+                        card.onclick = () => {
+                            swapInstrument(def.id);
+                        };
+                        grid.appendChild(card);
+                    });
+                    content.appendChild(grid);
+                });
+            } else {
+                renderSamples();
+            }
+        }
+
+        function renderSamples() {
+            const container = document.getElementById('savedSamples'); container.innerHTML = '';
+            if(!userSamples.length) {
+                container.innerHTML = `<span class="text-xs text-gray-600 block py-4 text-center">Nema učitanih uzoraka. Prevuci datoteku gore.</span>`; return;
+            }
+            userSamples.forEach(s => {
+                const card = document.createElement('button');
+                card.className = "w-full bg-zinc-950 hover:bg-zinc-900 border border-gray-800 p-2.5 rounded mb-2 flex justify-between items-center text-left";
+                card.innerHTML = `<div><span class="text-xs text-white font-bold block">${s.name}</span><span class="text-[9px] text-gray-500">${s.cat}</span></div>`;
+                card.onclick = () => swapInstrument(s.id);
+                container.appendChild(card);
+            });
+        }
+
+        function swapInstrument(newId) {
+            const ti = swapTargetIdx;
+            tracks[ti] = newId;
+            if(!pattern[newId]) pattern[newId] = new Array(STEPS).fill(0);
+            buildSequencer(); closeGallery();
+            showToast(`Swapped to: ${instName(newId)}`);
+        }
+
+        // Drag & Drop custom samples
+        const uploadZone = document.getElementById('uploadZone');
+        uploadZone.onclick = () => document.getElementById('sampleInput').click();
+        uploadZone.ondragover = (e) => { e.preventDefault(); uploadZone.className = "border-2 border-dashed border-[#00ffff] rounded-xl p-8 text-center bg-cyan-950/10 cursor-pointer"; };
+        uploadZone.ondragleave = () => { uploadZone.className = "border-2 border-dashed border-gray-800 rounded-xl p-8 text-center cursor-pointer"; };
+        uploadZone.ondrop = async (e) => {
+            e.preventDefault(); uploadZone.className = "border-2 border-dashed border-gray-800 rounded-xl p-8 text-center cursor-pointer";
+            const files = Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('audio/'));
+            for(const f of files) await loadSampleFile(f);
+        };
+        document.getElementById('sampleInput').onchange = async function(e) {
+            for(const f of e.target.files) await loadSampleFile(f);
+        };
+
+        async function loadSampleFile(file) {
+            getCtx();
+            const ab = await file.arrayBuffer();
+            const buf = await audioCtx.decodeAudioData(ab);
+            const id = 'sample_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+            userSamples.push({id, name: file.name.replace(/\.[^.]+$/, ''), cat: 'CUSTOM', buffer: buf});
+            renderSamples();
+            showToast(`Loaded sample: ${file.name}`);
+        }
+
+        document.querySelectorAll('.gtab').forEach(b => b.onclick = function() {
+            galleryTab = this.dataset.gtab;
+            document.querySelectorAll('.gtab').forEach(x => {
+                x.className = "gtab bg-transparent border border-gray-800 text-white text-xs px-3 py-1.5 rounded";
+            });
+            this.className = "gtab bg-[#00ffff] text-black font-bold text-xs px-3 py-1.5 rounded active";
+            renderGalleryTab();
+        });
+
+        // --- RECORDER LOGIC ---
+        document.getElementById('recBtn').onclick = function() {
+            getCtx();
+            if (isRecording) {
+                // Zaustavi snimanje
+                if(mediaRecorder) mediaRecorder.stop();
+                isRecording = false; clearInterval(recTimerInterval);
+                this.innerText = "⏺ RECORD"; this.className = "bg-[#ff0055] hover:bg-[#d00045] text-white font-bold text-xs px-4 py-2.5 rounded";
+            } else {
+                // Pokreni snimanje
+                try {
+                    const destStream = audioCtx.createMediaStreamDestination();
+                    masterGain.connect(destStream);
+                    mediaRecorder = new MediaRecorder(destStream.stream, {mimeType: 'audio/webm'});
+                    recChunks = [];
+                    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recChunks.push(e.data); };
+                    mediaRecorder.onstop = () => {
+                        lastBlob = new Blob(recChunks, {type: 'audio/webm'});
+                        document.getElementById('downloadBtn').className = "bg-green-600 hover:bg-green-700 text-black font-extrabold text-xs px-4 py-2.5 rounded";
+                        showToast("Recording saved successfully! Click Preuzmi");
+                    };
+                    mediaRecorder.start(100);
+                    isRecording = true; recStart = Date.now();
+                    this.innerText = "⏹ STOP"; this.className = "bg-yellow-600 hover:bg-yellow-700 text-black font-bold text-xs px-4 py-2.5 rounded animate-pulse";
+                    recTimerInterval = setInterval(() => {
+                        const s = Math.floor((Date.now() - recStart) / 1000);
+                        document.getElementById('recTimer').innerText = `${Math.floor(s/60)}:${String(s%60).padStart(2,'0')}`;
+                    }, 500);
+                } catch(e) {
+                    showToast("Snimanje nije podržano u ovom pregledniku", "err");
+                }
+            }
+        };
+
+        document.getElementById('downloadBtn').onclick = function() {
+            if(!lastBlob) return;
+            const a = document.createElement('a'); a.href = URL.createObjectURL(lastBlob); a.download = `zenit_mix_${Date.now()}.webm`; a.click();
+        };
+
+        // --- SONG IMPORT LOGIC ---
+        document.getElementById('importSongBtn').onclick = () => document.getElementById('songFile').click();
+        document.getElementById('songFile').onchange = async function(e) {
+            if(!e.target.files[0]) return;
+            const file = e.target.files[0];
+            document.getElementById('songInfo').innerText = file.name;
+            showToast("Estimating Song BPM...");
+            
+            // Auto BPM procjena pomoću analize onsets
+            try {
+                getCtx();
+                const ab = await file.arrayBuffer();
+                const decoded = await audioCtx.decodeAudioData(ab);
+                const estimated = estimateBpm(decoded);
+                if (estimated) {
+                    document.getElementById('bpmDetected').innerText = `~${estimated} BPM`;
+                    document.getElementById('bpmDetected').className = "text-[10px] bg-green-950/80 text-green-400 border border-green-800 px-2 py-1 rounded";
+                    const syncBtn = document.getElementById('syncBpmBtn');
+                    syncBtn.className = "bg-[#00ffff] hover:bg-cyan-400 text-black font-extrabold text-xs px-3 py-1 rounded";
+                    syncBtn.onclick = () => {
+                        updateTempo(Math.min(200, Math.max(60, estimated)));
+                        showToast(`Synced to ${estimated} BPM!`);
+                    };
+                }
+            } catch(err) {
+                showToast("BPM Analysis failed", "err");
+            }
+        };
+
+        function estimateBpm(buffer) {
+            const data = buffer.getChannelData(0);
+            const sr = buffer.sampleRate;
+            const hop = Math.floor(sr * 0.01);
+            const energies = [];
+            for (let i = 0; i < data.length - hop; i += hop) {
+                let e = 0; for (let j = 0; j < hop; j++) e += data[i + j] * data[i + j];
+                energies.push(e);
+            }
+            const avg = energies.reduce((a, b) => a + b, 0) / energies.length;
+            const beats = [];
+            for (let i = 1; i < energies.length - 1; i++) {
+                if (energies[i] > avg * 1.5 && energies[i] > energies[i - 1] && energies[i] > energies[i + 1]) beats.push(i);
+            }
+            if (beats.length < 2) return null;
+            const intervals = [];
+            for (let i = 1; i < beats.length; i++) intervals.push((beats[i] - beats[i - 1]) * hop / sr);
+            const med = intervals.sort((a, b) => a - b)[Math.floor(intervals.length / 2)];
+            return Math.round(60 / med);
+        }
+
+        // --- INIT ---
+        buildSequencer();
+        buildFxRow();
+    </script>
+</body>
+</html>
